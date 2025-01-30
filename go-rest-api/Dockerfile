@@ -9,7 +9,7 @@ COPY go.mod go.sum ./
 COPY middleware/middleware.go middleware/
 COPY greetings/greetings.go greetings/
 COPY handlers/handlers.go handlers/
-COPY main main
+
 RUN go mod download
 
 # Copie o código do projeto
