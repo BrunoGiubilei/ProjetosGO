@@ -45,15 +45,29 @@ func migrations() {
 	}
 
 	log.Println("Migrações aplicadas com sucesso")
+
+	db.Close()
+}
+
+func loggingMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		log.Printf("Received %s request for %s", r.Method, r.RequestURI)
+		next.ServeHTTP(w, r)
+	})
 }
 
 func routes() {
 	route := mux.NewRouter()
 
+	route.Use(loggingMiddleware)
 	route.Use(middleware.Cors)
 
 	route.HandleFunc("/api", handlers.GetAPI).Methods("GET")
 	route.HandleFunc("/api/greeting", handlers.GetGreeting).Methods("GET")
+	route.HandleFunc("/api/adduser", handlers.AddUser).Methods("POST", "OPTIONS")
+	route.HandleFunc("/api/getusers", handlers.GetUsers).Methods("GET")
+	route.HandleFunc("/api/removeuser/{id}", handlers.DeleteUser).Methods("DELETE", "OPTIONS")
+	route.HandleFunc("/api/alteruser/{id}", handlers.UpdateUser).Methods("PUT", "OPTIONS")
 
 	log.Println("Starting server on :8000")
 	log.Fatal(http.ListenAndServe(":8000", route))
